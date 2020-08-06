@@ -363,24 +363,52 @@ class PlayMode(Mode):
         if piece.col==otherpiece.col:
             if piece.row == otherpiece.row + 1:
                 if minDist<=piece.y-otherpiece.y<=maxDist and abs(piece.x-otherpiece.x)<=oneThird:
+                    oldx, oldy = piece.x, piece.y
                     piece.x=otherpiece.x
                     piece.y=otherpiece.y+piece.piecesize
+                    for chain in self.pieceschain:
+                        if piece in chain:
+                            for neighbor in chain:
+                                if neighbor is not piece:
+                                    neighbor.x = neighbor.x + (piece.x - oldx)
+                                    neighbor.y = neighbor.y + (piece.y - oldy)
                     return True
             elif piece.row == otherpiece.row - 1:
                 if minDist<=otherpiece.y-piece.y<=maxDist and abs(piece.x-otherpiece.x)<=oneThird:
+                    oldx, oldy = piece.x, piece.y
                     piece.x=otherpiece.x
                     piece.y=otherpiece.y-piece.piecesize
+                    for chain in self.pieceschain:
+                        if piece in chain:
+                            for neighbor in chain:
+                                if neighbor is not piece:
+                                    neighbor.x = neighbor.x + (piece.x - oldx)
+                                    neighbor.y = neighbor.y + (piece.y - oldy)
                     return True
         if piece.row==otherpiece.row:
             if piece.col == otherpiece.col + 1:
                 if abs(piece.y-otherpiece.y)<=oneThird and minDist<=piece.x-otherpiece.x<=maxDist:
+                    oldx, oldy = piece.x, piece.y
                     piece.x=otherpiece.x+piece.piecesize
                     piece.y=otherpiece.y
+                    for chain in self.pieceschain:
+                        if piece in chain:
+                            for neighbor in chain:
+                                if neighbor is not piece:
+                                    neighbor.x = neighbor.x + (piece.x - oldx)
+                                    neighbor.y = neighbor.y + (piece.y - oldy)
                     return True
             elif piece.col == otherpiece.col - 1:
                 if abs(piece.y-otherpiece.y)<=oneThird and minDist<=otherpiece.x-piece.x<=maxDist:
+                    oldx, oldy = piece.x, piece.y
                     piece.x=otherpiece.x-piece.piecesize
                     piece.y=otherpiece.y
+                    for chain in self.pieceschain:
+                        if piece in chain:
+                            for neighbor in chain:
+                                if neighbor is not piece:
+                                    neighbor.x = neighbor.x + (piece.x - oldx)
+                                    neighbor.y = neighbor.y + (piece.y - oldy)
                     return True
         return False
 
@@ -445,20 +473,6 @@ class PlayMode(Mode):
 
         self.check()
 
-
-            #######If dropped at original location###################
-            # if oldy<=y<=oldy+self.piecesize and oldx<=x<=oldx+self.piecesize:
-            #     for piece in self.pieces.piecesMainBoard:
-            #         if piece.isselected:#selected piece
-            #             piece.x,piece.y=oldx,oldy
-            #             piece.isselected=False
-            #             return
-            # if oldy<=y<=oldy+self.piecesize and oldx<=x<=oldx+self.piecesize:
-            #     for piece in self.pieces.pieces:
-            #         if piece.isselected:#selected piece
-            #             piece.x,piece.y=oldx,oldy
-            #             piece.isselected=False
-            #             return
         # print("Board=",self.pieces.piecesMainBoard)
         # print("Side=",self.pieces.pieces)
         print("Chains=",self.pieceschain)
