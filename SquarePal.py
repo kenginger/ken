@@ -357,27 +357,31 @@ class PlayMode(Mode):
         if otherpiece is piece:
             return False
         print("Looking for neighb")
-        if abs(piece.y-otherpiece.y)<otherpiece.piecesize and abs(piece.x-otherpiece.x)<otherpiece.piecesize:
-            if otherpiece in piece.neighbors or piece in otherpiece.neighbors:
-                return False
-            if piece.col==otherpiece.col:
-                if piece.row == otherpiece.row + 1:
+        oneThird = piece.piecesize//3
+        maxDist = piece.piecesize + oneThird
+        minDist = piece.piecesize - oneThird
+        if piece.col==otherpiece.col:
+            if piece.row == otherpiece.row + 1:
+                if minDist<=piece.y-otherpiece.y<=maxDist and abs(piece.x-otherpiece.x)<=oneThird:
                     piece.x=otherpiece.x
                     piece.y=otherpiece.y+piece.piecesize
                     return True
-                elif piece.col == otherpiece.col - 1:
+            elif piece.row == otherpiece.row - 1:
+                if minDist<=otherpiece.y-piece.y<=maxDist and abs(piece.x-otherpiece.x)<=oneThird:
                     piece.x=otherpiece.x
                     piece.y=otherpiece.y-piece.piecesize
                     return True
-            if piece.row==otherpiece.row:
-                if piece.col == otherpiece.col + 1:
+        if piece.row==otherpiece.row:
+            if piece.col == otherpiece.col + 1:
+                if abs(piece.y-otherpiece.y)<=oneThird and minDist<=piece.x-otherpiece.x<=maxDist:
                     piece.x=otherpiece.x+piece.piecesize
                     piece.y=otherpiece.y
                     return True
-                elif piece.col == otherpiece.col - 1:
+            elif piece.col == otherpiece.col - 1:
+                if abs(piece.y-otherpiece.y)<=oneThird and minDist<=otherpiece.x-piece.x<=maxDist:
                     piece.x=otherpiece.x-piece.piecesize
                     piece.y=otherpiece.y
-                return True
+                    return True
         return False
 
 
@@ -408,7 +412,6 @@ class PlayMode(Mode):
                     if piece in chain:
                         thisChain = chain
 
-                print("thisChain is: ", thisChain)
                 for p in thisChain:
                     if p != piece:
                         print("otherpiece old:", p.x, " ", p.y)
@@ -419,14 +422,15 @@ class PlayMode(Mode):
 
 
                 for otherpiece in self.pieces.piecesMainBoard:
-                    if self.canBeNeib(piece,otherpiece):
+                    if otherpiece not in thisChain and self.canBeNeib(piece,otherpiece):
                         print("Neighb: ", otherpiece.x, " , ", otherpiece.y)
                         ###### Merge with neighbor chain
                         otherChain = []
                         for chain in self.pieceschain:
                             if otherpiece in chain:
                                 otherChain = chain
-
+                        print("thisChain is: ", thisChain)
+                        print("otherChain is: ", otherChain)
                         if thisChain == [] and otherChain ==[]:
                             self.pieceschain.append([piece, otherpiece])
                         elif thisChain == []:
@@ -455,8 +459,8 @@ class PlayMode(Mode):
             #             piece.x,piece.y=oldx,oldy
             #             piece.isselected=False
             #             return
-        print("Board=",self.pieces.piecesMainBoard)
-        print("Side=",self.pieces.pieces)
+        # print("Board=",self.pieces.piecesMainBoard)
+        # print("Side=",self.pieces.pieces)
         print("Chains=",self.pieceschain)
         # self.temploc=None
 
