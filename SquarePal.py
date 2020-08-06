@@ -312,9 +312,9 @@ class PlayMode(Mode):
                 piece.drag(event.x,event.y)
                 for chain in self.pieceschain:
                     if piece in chain:
-                        thisChain = chain
-                for neighbor in piece.neighbors:
-                    neighbor.drag(event.x, event.y)
+                        for neighbor in chain:
+                            if neighbor is not piece:
+                                neighbor.drag(event.x, event.y)
             self.check()
 
         for piece in self.pieces.pieces:
@@ -336,9 +336,14 @@ class PlayMode(Mode):
                 print('mousePressedTemp:', self.temploc)
                 piece.isselected=True
                 piece.diff=(piece.x-x,piece.y-y)
-                for neighbor in piece.neighbors:
-                    neighbor.isSelected=True
-                    neighbor.diff=(neighbor.x-x,neighbor.y-y)
+                for chain in self.pieceschain:
+                    if piece in chain:
+                        for neighbor in chain:
+                            if neighbor is not piece:
+                                neighbor.diff=(neighbor.x-x,neighbor.y-y)
+                # for neighbor in piece.neighbors:
+                #     neighbor.isSelected=True
+                #     neighbor.diff=(neighbor.x-x,neighbor.y-y)
                 break
         for piece in self.pieces.pieces:
             if piece.y<=y<=piece.y+self.piecesize and piece.x<=x<=piece.x+self.piecesize:
@@ -349,8 +354,10 @@ class PlayMode(Mode):
 
 
     def canBeNeib(self,piece,otherpiece):
+        if otherpiece is piece:
+            return False
+        print("Looking for neighb")
         if abs(piece.y-otherpiece.y)<otherpiece.piecesize and abs(piece.x-otherpiece.x)<otherpiece.piecesize:
-            print("Looking for neighb")
             if otherpiece in piece.neighbors or piece in otherpiece.neighbors:
                 return False
             if piece.col==otherpiece.col:
@@ -406,7 +413,7 @@ class PlayMode(Mode):
                     if p != piece:
                         print("otherpiece old:", p.x, " ", p.y)
                         ##### TODO: Fix neighbor positions
-                        p.x,p.y=p.x+diffx,p.y+diffy
+                        # p.x,p.y=p.x+diffx,p.y+diffy
                         print("otherpiece new:", p.x, " ", p.y)
                     #######
 
@@ -429,7 +436,7 @@ class PlayMode(Mode):
                         else:
                             thisChain.extend(otherChain)
                             self.pieceschain.remove(otherChain)
-                    break
+                break
 
 
         self.check()
@@ -450,6 +457,7 @@ class PlayMode(Mode):
             #             return
         print("Board=",self.pieces.piecesMainBoard)
         print("Side=",self.pieces.pieces)
+        print("Chains=",self.pieceschain)
         # self.temploc=None
 
 
