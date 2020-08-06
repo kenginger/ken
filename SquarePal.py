@@ -366,24 +366,14 @@ class PlayMode(Mode):
                     oldx, oldy = piece.x, piece.y
                     piece.x=otherpiece.x
                     piece.y=otherpiece.y+piece.piecesize
-                    for chain in self.pieceschain:
-                        if piece in chain:
-                            for neighbor in chain:
-                                if neighbor is not piece:
-                                    neighbor.x = neighbor.x + (piece.x - oldx)
-                                    neighbor.y = neighbor.y + (piece.y - oldy)
+                    self.alignNeibWithMerge(piece,oldx,oldy)
                     return True
             elif piece.row == otherpiece.row - 1:
                 if minDist<=otherpiece.y-piece.y<=maxDist and abs(piece.x-otherpiece.x)<=oneThird:
                     oldx, oldy = piece.x, piece.y
                     piece.x=otherpiece.x
                     piece.y=otherpiece.y-piece.piecesize
-                    for chain in self.pieceschain:
-                        if piece in chain:
-                            for neighbor in chain:
-                                if neighbor is not piece:
-                                    neighbor.x = neighbor.x + (piece.x - oldx)
-                                    neighbor.y = neighbor.y + (piece.y - oldy)
+                    self.alignNeibWithMerge(piece,oldx,oldy)
                     return True
         if piece.row==otherpiece.row:
             if piece.col == otherpiece.col + 1:
@@ -391,27 +381,24 @@ class PlayMode(Mode):
                     oldx, oldy = piece.x, piece.y
                     piece.x=otherpiece.x+piece.piecesize
                     piece.y=otherpiece.y
-                    for chain in self.pieceschain:
-                        if piece in chain:
-                            for neighbor in chain:
-                                if neighbor is not piece:
-                                    neighbor.x = neighbor.x + (piece.x - oldx)
-                                    neighbor.y = neighbor.y + (piece.y - oldy)
+                    self.alignNeibWithMerge(piece,oldx,oldy)
                     return True
             elif piece.col == otherpiece.col - 1:
                 if abs(piece.y-otherpiece.y)<=oneThird and minDist<=otherpiece.x-piece.x<=maxDist:
                     oldx, oldy = piece.x, piece.y
                     piece.x=otherpiece.x-piece.piecesize
                     piece.y=otherpiece.y
-                    for chain in self.pieceschain:
-                        if piece in chain:
-                            for neighbor in chain:
-                                if neighbor is not piece:
-                                    neighbor.x = neighbor.x + (piece.x - oldx)
-                                    neighbor.y = neighbor.y + (piece.y - oldy)
+                    self.alignNeibWithMerge(piece,oldx,oldy)
                     return True
         return False
 
+    def alignNeibWithMerge(self,piece,oldx,oldy):
+        for chain in self.pieceschain:
+            if piece in chain:
+                for neighbor in chain:
+                    if neighbor is not piece:
+                        neighbor.x = neighbor.x + (piece.x - oldx)
+                        neighbor.y = neighbor.y + (piece.y - oldy)
 
     def mouseReleased(self,event):
         print("Board==",self.pieces.piecesMainBoard)
@@ -434,40 +421,34 @@ class PlayMode(Mode):
                 #diffx, diffy = x - piece.rx, y - piece.ry
                 (piece.rx,piece.ry)=(x,y)
 
-                ####### See if piece belongs to a chain(aka if we should move anything else)
                 thisChain = []
                 for chain in self.pieceschain:
                     if piece in chain:
                         thisChain = chain
 
-                for p in thisChain:
-                    if p != piece:
-                        print("otherpiece old:", p.x, " ", p.y)
-                        ##### TODO: Fix neighbor positions
-                        # p.x,p.y=p.x+diffx,p.y+diffy
-                        print("otherpiece new:", p.x, " ", p.y)
-                    #######
-
-
+                ####### See if we can nail any pieces together
                 for otherpiece in self.pieces.piecesMainBoard:
-                    if otherpiece not in thisChain and self.canBeNeib(piece,otherpiece):
-                        print("Neighb: ", otherpiece.x, " , ", otherpiece.y)
-                        ###### Merge with neighbor chain
-                        otherChain = []
-                        for chain in self.pieceschain:
-                            if otherpiece in chain:
-                                otherChain = chain
-                        print("thisChain is: ", thisChain)
-                        print("otherChain is: ", otherChain)
-                        if thisChain == [] and otherChain ==[]:
-                            self.pieceschain.append([piece, otherpiece])
-                        elif thisChain == []:
-                            otherChain.append(piece)
-                        elif otherChain == []:
-                            thisChain.append(otherpiece)
-                        else:
-                            thisChain.extend(otherChain)
-                            self.pieceschain.remove(otherChain)
+                    for chainpiece in thisChain+[piece]:
+                        if otherpiece not in thisChain and self.canBeNeib(chainpiece,otherpiece):
+                            print("Found Neighb: ", otherpiece.x, " , ", otherpiece.y)
+
+                            ###### Merge with neighbor chain
+                            otherChain = []
+                            for chain in self.pieceschain:
+                                if otherpiece in chain:
+                                    otherChain = chain
+                            print("thisChain is: ", thisChain)
+                            print("otherChain is: ", otherChain)
+
+                            if thisChain == [] and otherChain ==[]:
+                                self.pieceschain.append([piece, otherpiece])
+                            elif thisChain == []:
+                                otherChain.append(piece)
+                            elif otherChain == []:
+                                thisChain.append(otherpiece)
+                            else:
+                                thisChain.extend(otherChain)
+                                self.pieceschain.remove(otherChain)
                 break
 
 
@@ -475,7 +456,7 @@ class PlayMode(Mode):
 
         # print("Board=",self.pieces.piecesMainBoard)
         # print("Side=",self.pieces.pieces)
-        print("Chains=",self.pieceschain)
+        print("Chains=",len(self.pieceschain))
         # self.temploc=None
 
 
